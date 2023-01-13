@@ -27,7 +27,7 @@ class Tasks(BaseModel):
     name = db.Column(db.String(50), name="Task_name", unique=True)
     desc = db.Column(db.Text)
 
-    status = db.Column(db.Enum(StatusChoices))
+    status = db.Column(db.Enum(StatusChoices), default=StatusChoices.TODO)
 
 
 class Tags(BaseModel):
