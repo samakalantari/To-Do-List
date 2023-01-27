@@ -1,0 +1,12 @@
+# my .git ignores
+
+# database
+.instance/ToDoList.sqlite3
+
+# venv files
+venv/
+
+# ideas
+.idea/*
+
+.cache
