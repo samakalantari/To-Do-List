@@ -36,8 +36,17 @@ def add_task():
 @app.route('/remove_task', methods=["POST"])
 def remove_task():
     if request.method == "POST":
-        task_content = request.form["task_content"]
-        print(task_content)
+        exists = db.session.query(Tasks.name).filter_by(name=request.form["name"]).first() is not None
+        deleted = db.session.query(Tasks.is_deleted).filter_by(name=request.form["name"]).first() is True
+        if exists and not deleted:
+            task = db.session.query(Tasks).filter_by(name=request.form["name"]).first()
+            task.is_deleted = True
+            db.session.add(task)
+            db.session.commit()
+            return "OK"
+        elif exists and deleted:
+            return "Already deleted"
+        return "Not exists"
 
 
 if __name__ == '__main__':
