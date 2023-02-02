@@ -34,5 +34,3 @@ class Tags(BaseModel):
     __tablename__ = "tags"
 
     name = db.Column(db.String(50))
-
-
