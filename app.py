@@ -26,15 +26,19 @@ def hello_world():  # put application's code here
 @app.route('/add_task', methods=["POST"])
 def add_task():
     if request.method == "POST":
+        if not request.form.get("name"):
+            return {"error": "task must have name"}
+
         exists = db.session.query(Tasks.name).filter_by(name=request.form["name"]).first() is not None
         if not exists:
-            task = Tasks(name=request.form["name"],
-                         desc=request.form["description"],
-                         status=request.form["status"] if request.form["status"] is not None else "TODO")
-            print(task.status)
+            task = Tasks(name=request.form.get("name"),
+                         desc=request.form.get("description"),
+                         status=request.form.get("status", "TODO"))
             db.session.add(task)
             db.session.commit()
-        return "OK"
+        return {"task saved successfully": task.name}
+    return {"error": "task already exists"}
+
 
 
 @app.route('/remove_task', methods=["POST"])
