@@ -29,7 +29,7 @@ def add_task():
         if not request.form.get("name"):
             return {"error": "task must have name"}
 
-        exists = db.session.query(Tasks.name).filter_by(name=request.form["name"]).first() is not None
+        exists = db.session.query(Tasks.id).filter_by(name=request.form["name"]).first() is not None
         if not exists:
             task = Tasks(name=request.form.get("name"),
                          desc=request.form.get("description"),
@@ -37,24 +37,28 @@ def add_task():
             db.session.add(task)
             db.session.commit()
             return {"task saved successfully": task.name}
-    return {"error": "task already exists"}
 
+        return {"error": "task already exists"}
 
 
 @app.route('/remove_task', methods=["POST"])
 def remove_task():
     if request.method == "POST":
-        exists = db.session.query(Tasks.name).filter_by(name=request.form["name"]).first() is not None
-        deleted = db.session.query(Tasks.is_deleted).filter_by(name=request.form["name"]).first() is True
+        if not request.form.get("name"):
+            return {"error": "which one?"}
+
+        exists = db.session.query(Tasks.id).filter_by(name=request.form["name"]).first() is not None
+        deleted = db.session.query(Tasks).filter_by(name=request.form["name"]).first().is_deleted is True
+        print(deleted)
         if exists and not deleted:
             task = db.session.query(Tasks).filter_by(name=request.form["name"]).first()
             task.is_deleted = True
             db.session.add(task)
             db.session.commit()
-            return "OK"
+            return {"task deleted successfully": task.name}
         elif exists and deleted:
-            return "Already deleted"
-        return "Not exists"
+            return {"task already deleted": request.form.get("name")}
+        return {"error": "task {} not found".format(request.form.get("name"))}
 
 
 @app.route('/all_tasks', methods=["POST"])
@@ -71,7 +75,7 @@ def all_tasks():
             tasks = tasks.append(task, ignore_index=True)
         tasks = tasks.to_json(orient="split")
 
-    return tasks if not None else "Not exists"
+    return "Not exists" if None else tasks
 
 
 if __name__ == '__main__':
