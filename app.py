@@ -36,7 +36,7 @@ def add_task():
                          status=request.form.get("status", "TODO"))
             db.session.add(task)
             db.session.commit()
-        return {"task saved successfully": task.name}
+            return {"task saved successfully": task.name}
     return {"error": "task already exists"}
 
 
