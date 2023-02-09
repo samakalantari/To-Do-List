@@ -83,7 +83,9 @@ def edit_task():
     if deleted:
         return {"error": "deleted"}
 
-    if exists:
+    if not exists:
+        return {"error": "task not found"}
+    else:
         task = db.session.query(Tasks).filter_by(name=request.form["name"]).first()
 
         task.name = request.form.get("name", task.name)
@@ -94,8 +96,6 @@ def edit_task():
         db.session.commit()
 
         return {"task edited successfully": task.name}
-    else:
-        return {"error": "task not found"}
 
 
 if __name__ == '__main__':
