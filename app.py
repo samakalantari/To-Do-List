@@ -44,7 +44,7 @@ def remove_task():
 
     exists = db.session.query(Tasks.id).filter_by(name=request.form["name"]).first() is not None
     deleted = db.session.query(Tasks).filter_by(name=request.form["name"]).first().is_deleted is True
-    print(deleted)
+
     if exists and not deleted:
         task = db.session.query(Tasks).filter_by(name=request.form["name"]).first()
         task.is_deleted = True
@@ -69,7 +69,36 @@ def all_tasks():
         tasks = tasks.append(task, ignore_index=True)
     tasks = tasks.to_json(orient="split")
 
-    return "Not exists" if None else tasks
+    return {"error": "Not exists"} if None else tasks
+
+
+@app.route('/task', methods=["PUT"])
+def edit_task():
+    if not request.form.get("name"):
+        return {"error": "which one?"}
+
+    exists = db.session.query(Tasks.id).filter_by(name=request.form["name"]).first() is not None
+    deleted = db.session.query(Tasks).filter_by(name=request.form["name"]).first().is_deleted is True
+
+    if deleted:
+        return {"error": "deleted"}
+
+    if exists:
+        task = db.session.query(Tasks).filter_by(name=request.form["name"]).first()
+
+        task.name = request.form.get("name", task.name)
+        task.status = request.form.get("status", task.status)
+        task.desc = request.form.get("description", task.desc)
+
+        db.session.add(task)
+        db.session.commit()
+
+        return {"task edited successfully": task.name}
+    else:
+        return {"error": "task not found"}
+
+
+
 
 
 if __name__ == '__main__':
