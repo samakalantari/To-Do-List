@@ -18,7 +18,8 @@ with app.app_context():
     db.create_all()
 
 
-@app.route('/task', methods=["POST"])
+# Create a single task
+@app.route('/tasks', methods=["POST"])
 def add_task():
     if not request.form.get("name"):
         return {"error": "task must have name"}
@@ -37,25 +38,24 @@ def add_task():
     return {"error": "task already exists"}
 
 
-@app.route('/task', methods=["DELETE"])
-def remove_task():
-    if not request.form.get("name"):
-        return {"error": "which one?"}
+# Removes the task with given ID
+@app.route('/tasks/<task_id>', methods=["DELETE"])
+def remove_task(task_id):
+    exists = db.session.query(Tasks.id).filter_by(id=task_id).first() is not None
+    deleted = db.session.query(Tasks.is_deleted).filter_by(id=task_id).first() is True
 
-    exists = db.session.query(Tasks.id).filter_by(name=request.form["name"]).first() is not None
-    deleted = db.session.query(Tasks).filter_by(name=request.form["name"]).first().is_deleted is True
-    print(deleted)
     if exists and not deleted:
-        task = db.session.query(Tasks).filter_by(name=request.form["name"]).first()
+        task = db.session.query(Tasks).filter_by(id=task_id).first()
         task.is_deleted = True
         db.session.add(task)
         db.session.commit()
         return {"task deleted successfully": task.name}
     elif exists and deleted:
-        return {"task already deleted": request.form.get("name")}
-    return {"error": "task {} not found".format(request.form.get("name"))}
+        return {"task already deleted": "task with ID {}".format(task_id)}
+    return {"error": "task with ID {} not found".format(task_id)}
 
 
+# Returns all tasks
 @app.route('/tasks', methods=["GET"])
 def all_tasks():
     data = db.session.query(Tasks).all()
