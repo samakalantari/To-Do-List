@@ -1,8 +1,5 @@
 import datetime
 import enum
-from flask_sqlalchemy import SQLAlchemy
-
-from app import db
 
 
 class BaseModel(db.Model):
@@ -34,3 +31,13 @@ class Tags(BaseModel):
     __tablename__ = "tags"
 
     name = db.Column(db.String(50))
+
+
+def create_db():
+    global db
+    with db:
+        db.create_all()
+
+
+if __name__ == '__main__':
+    create_db()
